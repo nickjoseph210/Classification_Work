@@ -6,7 +6,7 @@ import sklearn.impute
 import acquire
 
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import LableEncoder, OneHotEncoder, MinMaxScaler
+from sklearn.preprocessing import LabelEncoder, OneHotEncoder, MinMaxScaler
 from env import host, user, password
 
 def get_connection(db, user=user, host=host, password=password):
@@ -56,16 +56,16 @@ def partner_dependents(df):
     """
     Converts 'Yes' and 'No' to numerical values from df columns 'partner' and 'dependents,' then creates a new df column 'partner_and_dependents'
     """
-    partner_and_dependents = []# empty list to catch function returns
+    partner_and_dependents = []# empty list to catch loop answers
 
     for i in range(len(df.partner)):
-        if df.partner[i] == "No" and df.dependents == "No":
+        if df.partner[i] == "No" and df.dependents[i] == "No":
             partner_and_dependents.append(0)
-        elif df.partner[i] == "Yes" and df.dependents == "No":
+        elif df.partner[i] == "Yes" and df.dependents[i] == "No":
             partner_and_dependents.append(1)
-        elif df.partner[i] == "No" and df.dependents == "Yes":
+        elif df.partner[i] == "No" and df.dependents[i] == "Yes":
             partner_and_dependents.append(2)
-        elif df.partner[i] == "Yes" and df.dependents == "Yes":
+        elif df.partner[i] == "Yes" and df.dependents[i] == "Yes":
             partner_and_dependents.append(3)
     df["partner_and_dependents"] = partner_and_dependents
     return df
