@@ -1,13 +1,13 @@
-import pandas as pd
 import numpy as np
+import pandas as pd
 import sklearn.preprocessing
 import sklearn.model_selection
 import sklearn.impute
-import acquire
-
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder, MinMaxScaler
-from env import host, user, password
+
+import env
+import acquire
 
 def fill_na(df):
     df.replace(to_replace = " ", value = np.nan, inplace = True)
@@ -24,10 +24,7 @@ def phone_lines(df):
     return df
 
 def partner_dependents(df):
-    """
-    Converts 'Yes' and 'No' to numerical values from df columns 'partner' and 'dependents,' then creates a new df column 'partner_and_dependents'
-    """
-    partner_and_dependents = []# empty list to catch loop answers
+    partner_and_dependents = []
     
     for i in range(len(df.partner)):
         if df.partner[i] == 'No' and df.dependents[i] == 'No':
@@ -42,24 +39,8 @@ def partner_dependents(df):
     df['partner_and_dependents'] = partner_and_dependents
     return df
 
-# def partner_dependents(df):
-#     partner_and_dependents = []
-    
-#     for i in range(len(df.partner)):
-#         if df.partner[i] == 'No' and df.dependents[i] == 'No':
-#             partner_and_dependents.append(0)
-#         elif df.partner[i] == 'Yes' and df.dependents[i] == 'No':
-#             partner_and_dependents.append(1)
-#         elif df.partner[i] == "No" and df.dependents[i] == 'Yes':
-#             partner_and_dependents.append(2)
-#         elif df.partner[i] == 'Yes' and df.dependents[i] == 'Yes':
-#             partner_and_dependents.append(3)
-    
-#     df['partner_and_dependents'] = partner_and_dependents
-#     return df
-
 def drop_columns(df):
-    return df.drop(columns=['payment_type_id', 'internet_service_type_id', 'contract_type_id', 'partner', 'dependents', 'phone_service', 'multiple_lines'])
+    return df.drop(columns=['payment_type_id', 'internet_service_type_id', 'contract_type_id', 'partner', 'dependents', 'phone_service', 'tenure', 'multiple_lines'])
 
 def X_label_encode(df):
     le = LabelEncoder()
@@ -76,15 +57,15 @@ def X_label_encode(df):
 
 def y_label_encode(df):
     le = LabelEncoder()
-    df['churn'] = le.fit_transform(df.churn)
+    df['churn'] = le.fit_transform(df[["churn"]])
     return df
 
 def one_hot_encoder(df):
-    one_hot = OneHotEncoder(categories = 'auto', sparse = False)
+    one_hot = OneHotEncoder(sparse = False)
     payment_encoded = one_hot.fit_transform(df[['payment_type']])
-    payment_labels = list(np.array(df.payment_type.value_counts().index))
+    payment_labels = list(df.payment_type.value_counts().sort_index().index)
     payment_encoded_df = pd.DataFrame(payment_encoded, columns = payment_labels, index = df.index)
-    
+
     internet_encoded = one_hot.fit_transform(df[['internet_service_type']])
     internet_labels = list(df.internet_service_type.value_counts().sort_index().index)
     internet_encoded_df = pd.DataFrame(internet_encoded, columns = internet_labels, index = df.index)
@@ -125,9 +106,9 @@ def split_telco(df):
     train, validate = sklearn.model_selection.train_test_split(train, train_size=.80, random_state=123)
 
     # split into X and y
-    X_train, y_train = train, train[['churn']]
-    X_validate, y_validate = validate, validate[['churn']]
-    X_test, y_test = test, test[['churn']]
+    X_train, y_train = train, train[["churn"]]
+    X_validate, y_validate = validate, validate[["churn"]]
+    X_test, y_test = test, test[["churn"]]
     
     X_train = X_label_encode(X_train)
     X_validate = X_label_encode(X_validate)
